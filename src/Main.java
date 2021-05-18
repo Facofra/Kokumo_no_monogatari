@@ -1,0 +1,10 @@
+import java.io.IOException;
+public class Main {
+    public static void main(String[] args) {
+        final int boardSize=5;
+        Game game = new Game(boardSize);
+        game.run();
+
+
+    }
+}
