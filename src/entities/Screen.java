@@ -2,21 +2,31 @@ package entities;
 
 public class Screen {
 
-    public void render(Board board){
+    public void renderBoard(Board board){
         Field[][] gameBoard = board.getBoard();
 
         for (int i = 0; i < gameBoard.length; i++) {
             for (int j = 0; j < gameBoard[i].length; j++) {
                 if (gameBoard[i][j].getNinja() == null){
-                    System.out.print("#");
+                    print("#");
                 }else {
-                    System.out.print(gameBoard[i][j].getNinja().getSprite());
+                    print(gameBoard[i][j].getNinja().getSprite());
                 }
             }
-            System.out.println();
+            println();
         }
     }
 
+    public void print(String text){
+        System.out.print(text);
+    }
+
+    public void println(String text){
+        System.out.println(text);
+    }
+    public void println(){
+        System.out.println();
+    }
 
 
 }

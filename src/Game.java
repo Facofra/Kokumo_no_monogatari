@@ -9,43 +9,38 @@ public class Game {
     private int playerTurn;
     private Scanner input;
     private final int boardSize;
+    private final int numberOfNinjas;
+    private final String[] sprites;
 
-    public Game(int boardSize) {
+    public Game(int boardSize, int numberOfNinjas, String[] sprites) {
         screen = new Screen();
         input = new Scanner(System.in);
         players = new Player[2];
         this.boardSize= boardSize;
+        this.numberOfNinjas = numberOfNinjas;
+        this.sprites = sprites;
 
     }
 
     public void run(){
         configurePlayer();
-        boolean playing = true;
+        ninjaPlacement();
 
-        while (playing){
-            screen.render(players[0].getBoard());
-
-            System.out.println("Es momento de colocar tres ninjas y un capitán en el tablero.");
-            System.out.println("¿Donde colocar al capitán?.");
-            System.out.print("Ingrese columa: ");
-            char column = input.nextLine().charAt(0) ;
-            System.out.print("Ingrese fila: ");
-            int row = Integer.valueOf( input.nextLine() );
-            players[0].getBoard().placeNinja(column-65,row,new Ninja("N1"));
-
-            screen.render(players[0].getBoard());
-            playing=false;
-        }
+//        boolean playing = true;
+//        while (playing){
+//
+//            playing=false;
+//        }
     }
 
     private void configurePlayer(){
-        System.out.println("(1) Servidor");
-        System.out.println("(2) Cliente");
-        System.out.print("Ejecutar como: ");
+        screen.println("(1) Servidor");
+        screen.println("(2) Cliente");
+        screen.print("Ejecutar como: ");
         int mode = Integer.valueOf( input.nextLine() );
-        System.out.print("Ingrese nombre de jugador: ");
+        screen.print("Ingrese nombre de jugador: ");
         String name = input.nextLine();
-        System.out.print("Ingrese IP: ");
+        screen.print("Ingrese IP: ");
         String ip = input.nextLine();
 
         GameMode gameMode = mode == 1 ? GameMode.SERVER : GameMode.CLIENT;
@@ -54,9 +49,28 @@ public class Game {
 
         if (player.getGameMode() == GameMode.SERVER){
             players[0] = player;
+            playerTurn=0;
         }else{
             players[1] = player;
+            playerTurn=1;
         }
+
+    }
+
+    public void ninjaPlacement(){
+        while (players[playerTurn].getNinjasOnBoardQuantity() < numberOfNinjas){
+            screen.renderBoard(players[playerTurn].getBoard());
+
+            screen.println("Es momento de colocar tres ninjas y un capitán en el tablero.");
+            screen.println("¿Donde colocar al capitán?.");
+            screen.print("Ingrese columa: ");
+            char column = input.nextLine().charAt(0) ;
+            screen.print("Ingrese fila: ");
+            int row = Integer.valueOf( input.nextLine() );
+            players[playerTurn].getBoard().placeNinja(column-65,row,new Ninja("N1"));
+
+        }
+        screen.renderBoard(players[playerTurn].getBoard());
 
     }
 
