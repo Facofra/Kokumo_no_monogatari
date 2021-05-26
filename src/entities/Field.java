@@ -4,6 +4,10 @@ public class Field {
     private Ninja ninja;
     private boolean isTransitable;
 
+    public Field() {
+        this.isTransitable = true;
+    }
+
     public void setNinja(Ninja ninja) {
         this.ninja = ninja;
     }

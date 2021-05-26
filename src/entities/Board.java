@@ -1,27 +1,41 @@
 package entities;
 
 public class Board {
-    private Field[][] board;
+    private Field[][] fields;
+    private int boardSize;
     private int ninjasOnBoardQuantity;
 
     public Board( int boardSize) {
-        this.board = new Field[boardSize][boardSize];
+        this.boardSize = boardSize;
+        this.fields = new Field[boardSize][boardSize];
 
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
-                board[i][j]=new Field();
+                fields[i][j]=new Field();
             }
         }
     }
 
     public void placeNinja(int column, int row, Ninja ninja){
-        board[row][column].setNinja(ninja);
+        fields[row][column].setNinja(ninja);
+        fields[row][column].setTransitable(false);
         ninjasOnBoardQuantity++;
     }
 
     public void eliminateNinja(int column, int row){
-        board[row][column].setNinja(null);
-        ninjasOnBoardQuantity--;
+        if (fields[row][column].getNinja() != null){
+            fields[row][column].setNinja(null);
+            fields[row][column].setTransitable(true);
+            ninjasOnBoardQuantity--;
+        }
+    }
+
+    public void clearBoard(){
+        for (int i = 0; i < boardSize; i++) {
+            for (int j = 0; j < boardSize; j++) {
+                eliminateNinja(i,j);
+            }
+        }
     }
 
     public int getNinjasOnBoardQuantity() {
@@ -32,7 +46,11 @@ public class Board {
         this.ninjasOnBoardQuantity = ninjasOnBoard;
     }
 
-    public Field[][] getBoard() {
-        return board;
+    public Field[][] getFields() {
+        return fields;
+    }
+
+    public int getBoardSize() {
+        return boardSize;
     }
 }
