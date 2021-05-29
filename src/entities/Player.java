@@ -9,17 +9,17 @@ public class Player {
     private String name;
     private String ip;
     private Board board;
-    private  Board opponentBoardImage;
+    private  Board opponentBoard;
     private Ninja[] ninjas;
     private GameMode gameMode;
 
 
-    public Player(String name, String ip, GameMode gameMode, Board board, Board opponentBoardImage, int numberOfNinjas) {
+    public Player(String name, String ip, GameMode gameMode, Board board, Board opponentBoard, int numberOfNinjas) {
         this.name = name;
         this.ip = ip;
         this.gameMode = gameMode;
         this.board = board;
-        this.opponentBoardImage = opponentBoardImage;
+        this.opponentBoard = opponentBoard;
         this.ninjas = new Ninja[numberOfNinjas];
     }
 
@@ -57,8 +57,8 @@ public class Player {
         return gameMode;
     }
 
-    public Board getOpponentBoardImage() {
-        return opponentBoardImage;
+    public Board getOpponentBoard() {
+        return opponentBoard;
     }
 
     public Ninja[] getNinjas() {
@@ -73,6 +73,9 @@ public class Player {
 
     public Ninja getNinjaFromBoard(int row, int column){
         return board.getFields()[row][column].getNinja();
+    }
+    public void placeNinaOnBoard(int column, int row, Ninja ninja){
+        getBoard().placeNinja(column,row,ninja);
     }
 
     public boolean isCommanderAlive(){

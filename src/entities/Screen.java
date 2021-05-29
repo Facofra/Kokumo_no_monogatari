@@ -5,6 +5,7 @@ public class Screen {
     public void renderBoard(Board board){
         Field[][] gameBoard = board.getFields();
         int boardSize = gameBoard.length;
+        println();
         print("   ");
         for (int i = 0; i < boardSize; i++) {
             char columnChar = (char) (i +65) ;
@@ -21,7 +22,11 @@ public class Screen {
             print((i+1) + "| ");
             for (int j = 0; j < gameBoard[i].length; j++) {
                 if (gameBoard[i][j].getNinja() == null){
-                    print(". ");
+                    if (gameBoard[i][j].isTransitable()) {
+                        print(". ");
+                    }else {
+                        print("x ");
+                    }
                 }else {
                     print(gameBoard[i][j].getNinja().getSprite() + " ");
                 }

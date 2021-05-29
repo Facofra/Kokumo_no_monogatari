@@ -58,6 +58,10 @@ public class Ninja {
         return lives;
     }
 
+    public void recieveAttack(){
+        lives-=1;
+    }
+
     public boolean hasActed() {
         return hasActed;
     }

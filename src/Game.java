@@ -7,12 +7,12 @@ import java.util.Scanner;
 public class Game {
     private Screen screen;
     private Player[] players;
-    private int playerTurn;
     private Scanner input;
+    private Validator validator;
+    private String lineReader;
+    private int playerTurn;
     private final int boardSize;
     private final int numberOfNinjas;
-    private String lineReader;
-    private Validator validator;
 
     public Game(int boardSize, int numberOfNinjas) {
         screen = new Screen();
@@ -29,11 +29,17 @@ public class Game {
         configurePlayer();
         ninjaPlacement();
 
-        while (playing){
-            playerAction();
+        configurePlayer();
+        ninjaPlacement();
 
-            playing=false;
+        while (playing){
+            screen.println("Turno de " + players[playerTurn].getName());
+            playerAction();
+            playing= ! checkDeadOpponent();
+
+            nextTurn();
         }
+        endGame();
     }
 
     private void configurePlayer(){
@@ -49,9 +55,19 @@ public class Game {
         else if (lineReader.equals("1") || lineReader.equals("2")){
             int mode = Integer.valueOf( lineReader);
             screen.print("Ingrese nombre de jugador: ");
-            String name = input.nextLine();
+            lineReader = input.nextLine();
+            while (lineReader.equals("")){
+                screen.print("No puede estar vació. Ingrese nombre: ");
+                lineReader = input.nextLine();
+            }
+            String name = lineReader;
             screen.print("Ingrese IP: ");
-            String ip = input.nextLine();
+            lineReader = input.nextLine();
+            while (lineReader.equals("")){
+                screen.print("No puede estar vació. Ingrese IP: ");
+                lineReader = input.nextLine();
+            }
+            String ip = lineReader;
 
             GameMode gameMode = mode == 1 ? GameMode.SERVER : GameMode.CLIENT;
             Board board = new Board(boardSize);
@@ -78,69 +94,38 @@ public class Game {
         int i = 0;
         int column;
         int row;
+        Player actualPlayer = players[playerTurn];
 
         screen.println("Es momento de colocar " + numberOfNinjas +" ninjas en el tablero.");
-        screen.renderBoard(players[playerTurn].getBoard());
+        screen.renderBoard(actualPlayer.getBoard());
         screen.println("¿Donde colocar al capitán?");
-        screen.print("Ingrese columa: ");
-        lineReader = input.nextLine();
 
-        while (! validator.validateColumn(lineReader)){
-            screen.println("Error, debe colocar una columna válida");
-            screen.print("Ingrese columa: ");
-            lineReader = input.nextLine();
-        }
-        column = columnCharToInt( lineReader.charAt(0) );
+        column = columnInput();
+        row = rowInput() ;
 
-        screen.print("Ingrese fila: ");
-        lineReader = input.nextLine();
-        while (! validator.validateRow(lineReader)){
-            screen.println("Error, debe colocar una fila válida");
-            screen.print("Ingrese fila: ");
-            lineReader = input.nextLine();
-        }
+        actualPlayer.getBoard().placeNinja(column,row,new Ninja(NinjaType.COMMANDER));
 
-        row = Integer.valueOf( lineReader ) -1 ;
-
-        players[playerTurn].getBoard().placeNinja(column,row,new Ninja(NinjaType.COMMANDER));
-
-        players[playerTurn].setNinja(i,new Ninja(NinjaType.COMMANDER),row, column);
+        actualPlayer.setNinja(i,new Ninja(NinjaType.COMMANDER),row, column);
         i++;
 
-        while (players[playerTurn].getNinjasOnBoardQuantity() < numberOfNinjas){
-            screen.renderBoard(players[playerTurn].getBoard());
+        while (actualPlayer.getNinjasOnBoardQuantity() < numberOfNinjas){
+            screen.renderBoard(actualPlayer.getBoard());
 
             screen.println("¿Donde colocar al ninja " + i +" ?");
-            screen.print("Ingrese columa: ");
-            lineReader = input.nextLine();
 
-            while (! validator.validateColumn(lineReader)){
-                screen.println("Error, debe colocar una columna válida");
-                screen.print("Ingrese columa: ");
-                lineReader = input.nextLine();
-            }
-            column = columnCharToInt( lineReader.charAt(0) );
+            column = columnInput();
+            row = rowInput() ;
 
+            if (actualPlayer.getNinjaFromBoard(row,column) == null){
+                actualPlayer.placeNinaOnBoard(column,row,new Ninja(NinjaType.NORMAL));
 
-            screen.print("Ingrese fila: ");
-            lineReader = input.nextLine();
-            while (! validator.validateRow(lineReader)){
-                screen.println("Error, debe colocar una fila válida");
-                screen.print("Ingrese fila: ");
-                lineReader = input.nextLine();
-            }
-
-            row = Integer.valueOf( lineReader ) -1 ;
-
-            if (players[playerTurn].getBoard().getFields()[row][column].getNinja() == null){
-                players[playerTurn].getBoard().placeNinja(column,row,new Ninja(NinjaType.NORMAL));
-                players[playerTurn].setNinja(i,new Ninja(NinjaType.NORMAL),row, column);
+                actualPlayer.setNinja(i,new Ninja(NinjaType.NORMAL),row, column);
                 i++;
             }else {
                 screen.println("En ese lugar ya había un ninja, colocar nuevamente.");
             }
         }
-        screen.renderBoard(players[playerTurn].getBoard());
+        screen.renderBoard(actualPlayer.getBoard());
 
 
         screen.print("Estás contento con las posiciones? (S/N): ");
@@ -152,14 +137,20 @@ public class Game {
 
         char option = lineReader.charAt(0) ;
         if (option == 'N' || option == 'n'){
-            players[playerTurn].getBoard().clearBoard();
+            actualPlayer.getBoard().clearBoard();
             ninjaPlacement();
         }
 
     }
 
-    public void nextTurn(){}
-    public void endGame(){}
+    public void nextTurn(){
+        playerTurn = playerTurn == 1 ? 0 : 1;
+    }
+    public void endGame(){
+        nextTurn();
+        screen.println("El juego terminó");
+        screen.println(players[playerTurn].getName() + " es quien ganó! FELICITACIONES");
+    }
 
     public void playerAction(){
         Player actualPlayer = players[playerTurn];
@@ -167,7 +158,7 @@ public class Game {
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
                 if (actualPlayer.getNinjaFromBoard(i,j) != null && ! actualPlayer.getNinjaFromBoard(i,j).hasActed()){
-                    screen.renderBoard(players[playerTurn].getBoard());
+                    screen.renderBoard(actualPlayer.getBoard());
 
                     screen.println("Ninja de Fila: " + (i+1) + " Columna: " + columnIntToChar(j));
 
@@ -187,23 +178,24 @@ public class Game {
                         exit();
                     }
                     if (lineReader.equals("M") || lineReader.equals("m")){
-                        if (actualPlayer.isCommanderAlive() && actualPlayer.getNinjaFromBoard(i,j).isCanMove() && validator.validateFreeSpace(i,j,actualPlayer.getBoard().getFields())){
+                        if (validator.validateCanMove(actualPlayer,i,j)){
                             playerMoves(i,j);
+                            screen.println("Movimiento realizado con éxito.");
                         }else{
-                            screen.println("El ninja no se puede mover, escoja otra opción");
+                            screen.println(validator.getMessage());
+                            screen.println("Escoja otra opción.");
                             j--;
                         }
                     }
                     if (lineReader.equals("A") || lineReader.equals("a")){
                         actualPlayer.getNinjaFromBoard(i,j).setCanMove(true);
                         actualPlayer.getNinjaFromBoard(i,j).setHasActed(true);
-                        exit();
+                        playerAttacks();
+                        screen.println("Ataque realizado con exito");
+
                     }
                 }
-
-
             }
-
         }
 
 //  resetear el hasActed a false, es una solución momentanea hasta no implementar guardar ninjas en array
@@ -219,45 +211,58 @@ public class Game {
     private void playerMoves(int originRow, int originColumn){
         int destinationColumn;
         int destinationRow;
-        Player player = players[playerTurn];
+        Player actualPlayer = players[playerTurn];
 
         screen.println("Indique coordenada a donde quiere mover el ninja");
 
-        screen.print("Ingrese columa: ");
-        lineReader = input.nextLine();
+        destinationColumn = columnInput();
+        destinationRow = rowInput() ;
 
-        while (! validator.validateColumn(lineReader)){
-            screen.println("Error, debe colocar una columna válida");
-            screen.print("Ingrese columa: ");
-            lineReader = input.nextLine();
-        }
-        destinationColumn = columnCharToInt( lineReader.charAt(0) );
+        if (validator.validateMovement(originColumn, originRow, destinationColumn, destinationRow, actualPlayer.getBoard().getFields())){
 
-        screen.print("Ingrese fila: ");
-        lineReader = input.nextLine();
-        while (! validator.validateRow(lineReader)){
-            screen.println("Error, debe colocar una fila válida");
-            screen.print("Ingrese fila: ");
-            lineReader = input.nextLine();
-        }
-
-        destinationRow = Integer.valueOf( lineReader ) -1 ;
-
-        if (validator.validateMovement(originColumn, originRow, destinationColumn, destinationRow, player.getBoard().getFields())){
-
-            Ninja ninjaAux = player.getNinjaFromBoard(originRow,originColumn);
+            Ninja ninjaAux = actualPlayer.getNinjaFromBoard(originRow,originColumn);
             ninjaAux.setCanMove(false);
             ninjaAux.setHasActed(true);
-            player.getBoard().eliminateNinja(originColumn,originRow);
-            player.getBoard().placeNinja(destinationColumn,destinationRow,ninjaAux);
+            actualPlayer.getBoard().eliminateNinja(originColumn,originRow);
+            actualPlayer.getBoard().placeNinja(destinationColumn,destinationRow,ninjaAux);
         }else{
             screen.println(validator.getMessage() + " Pruebe de nuevo.");
+            screen.renderBoard(players[playerTurn].getBoard());
             playerMoves(originRow,originColumn);
         }
 
     }
 
     private void playerAttacks(){
+        Player actualPlayer = players[playerTurn];
+        Player opponent = players[playerTurn == 1 ? 0 : 1];
+        int row;
+        int column;
+
+        screen.renderBoard(actualPlayer.getOpponentBoard());
+        screen.println("Ingrese coordenada a atacar.");
+        column = columnInput();
+        row = rowInput();
+
+        while (! actualPlayer.getOpponentBoard().getFields()[row][column].isTransitable()){
+            screen.println("Esa coordenada ya ha sido atacada.");
+            screen.println("Ingrese otra coordenada a atacar.");
+            column = columnInput();
+            row = rowInput();
+        }
+
+        actualPlayer.getOpponentBoard().getFields()[row][column].setTransitable(false);
+
+        if (opponent.getNinjaFromBoard(row,column) == null){
+            opponent.getBoard().getFields()[row][column].setTransitable(false);
+        }else {
+            opponent.getNinjaFromBoard(row,column).recieveAttack();
+            if (opponent.getNinjaFromBoard(row,column).getLives()==0){
+                opponent.getBoard().killNinja(row,column);
+            }
+        }
+
+//            AVISAR AL JUGADOR SI FALLÓ o ATINÓ?
 
     }
 
@@ -271,6 +276,37 @@ public class Game {
 
     public int getPlayerTurn() {
         return playerTurn;
+    }
+
+    private boolean checkDeadOpponent(){
+        Player actualPlayer = players[playerTurn];
+        Player opponent = players[playerTurn == 1 ? 0 : 1];
+
+        return opponent.getBoard().getNinjasOnBoardQuantity() == 0;
+    }
+
+    private int columnInput(){
+        screen.print("Ingrese columa: ");
+        lineReader = input.nextLine();
+
+        while (! validator.validateColumn(lineReader)){
+            screen.println("Error, debe colocar una columna válida");
+            screen.print("Ingrese columa: ");
+            lineReader = input.nextLine();
+        }
+        return columnCharToInt( lineReader.charAt(0) );
+    }
+
+    private int rowInput(){
+        screen.print("Ingrese fila: ");
+        lineReader = input.nextLine();
+        while (! validator.validateRow(lineReader)){
+            screen.println("Error, debe colocar una fila válida");
+            screen.print("Ingrese fila: ");
+            lineReader = input.nextLine();
+        }
+
+        return Integer.valueOf( lineReader ) -1 ;
     }
 
     private int columnCharToInt(char columnChar){

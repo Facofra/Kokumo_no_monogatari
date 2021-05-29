@@ -23,9 +23,14 @@ public class Board {
     }
 
     public void eliminateNinja(int column, int row){
+        killNinja(row,column);
+        fields[row][column].setTransitable(true);
+    }
+
+    public void killNinja(int row, int column){
         if (fields[row][column].getNinja() != null){
             fields[row][column].setNinja(null);
-            fields[row][column].setTransitable(true);
+            fields[row][column].setTransitable(false);
             ninjasOnBoardQuantity--;
         }
     }

@@ -69,6 +69,22 @@ public class Validator {
         return true;
     }
 
+    public boolean validateCanMove(Player actualPlayer, int i, int j){
+        if (! actualPlayer.isCommanderAlive()){
+            message="Ninja no se puede mover, Comandante no está vivo.";
+            return false;
+        }
+        if (! actualPlayer.getNinjaFromBoard(i,j).isCanMove()){
+            message="Ninja no se puede mover, se ha movido el turno anterior.";
+            return false;
+        }
+        if (! validateFreeSpace(i,j,actualPlayer.getBoard().getFields())){
+            message="Ninja no se puede mover, no tiene espacio libre al rededor.";
+            return false;
+        }
+        return true;
+    }
+
     public boolean validateFreeSpace(int row, int column, Field[][] board){
 
         for (int i = -1; i < 2; i++) {
