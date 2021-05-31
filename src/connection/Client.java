@@ -2,10 +2,12 @@ package connection;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,5 +57,23 @@ public class Client {
             }
         }
         return null;
+    }
+
+    public String recieveMessage(){
+        try {
+            URL url = new URL("http://192.168.0.8:8000/");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("accept", "application/json");
+            InputStream responseStream = connection.getInputStream();
+
+            Scanner s = new Scanner(responseStream).useDelimiter("\\A");
+            String result = s.hasNext() ? s.next() : "";
+
+            return result;
+
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+            return ex.getMessage();
+        }
     }
 }

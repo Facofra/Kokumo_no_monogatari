@@ -9,14 +9,21 @@ import java.io.*;
 import java.net.InetSocketAddress;
 
 public class Server {
-    public static void start() throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+    MessageHandler messageHandler = new MessageHandler();
+    HttpServer server;
+    public void start() throws Exception {
+        server = HttpServer.create(new InetSocketAddress(8000), 0);
+        server.createContext("/", messageHandler);
         server.createContext("/info", new InfoHandler());
         server.createContext("/get", new GetHandler());
         server.setExecutor(null); // creates a default executor
         server.start();
 
 
+    }
+
+    public void sendMessage(String message){
+        messageHandler.setMessage(message);
     }
 
     static class InfoHandler implements HttpHandler {
