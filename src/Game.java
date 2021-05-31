@@ -33,7 +33,7 @@ public class Game {
         ninjaPlacement();
 
         while (playing){
-            screen.println("Turno de " + players[playerTurn].getName());
+            screen.println("\n***** Turno de " + players[playerTurn].getName() + " *****");
             playerAction();
             playing= ! checkDeadOpponent();
 
@@ -43,7 +43,7 @@ public class Game {
     }
 
     private void configurePlayer(){
-        screen.println("(1) Servidor");
+        screen.println("\n(1) Servidor");
         screen.println("(2) Cliente");
         screen.println("(S) Salir");
         screen.print("Ejecutar como: ");
@@ -96,7 +96,7 @@ public class Game {
         int row;
         Player actualPlayer = players[playerTurn];
 
-        screen.println("Es momento de colocar " + numberOfNinjas +" ninjas en el tablero.");
+        screen.println("\nEs momento de colocar " + numberOfNinjas +" ninjas en el tablero.");
         screen.renderBoard(actualPlayer.getBoard());
         screen.println("¿Donde colocar al capitán?");
 
@@ -148,8 +148,8 @@ public class Game {
     }
     public void endGame(){
         nextTurn();
-        screen.println("El juego terminó");
-        screen.println(players[playerTurn].getName() + " es quien ganó! FELICITACIONES");
+        screen.println("\nEl juego terminó");
+        screen.println("Ganador: *** "+ players[playerTurn].getName() + " ***");
     }
 
     public void playerAction(){
@@ -180,7 +180,7 @@ public class Game {
                     if (lineReader.equals("M") || lineReader.equals("m")){
                         if (validator.validateCanMove(actualPlayer,i,j)){
                             playerMoves(i,j);
-                            screen.println("Movimiento realizado con éxito.");
+                            screen.println("\nMovimiento realizado con éxito.");
                         }else{
                             screen.println(validator.getMessage());
                             screen.println("Escoja otra opción.");
@@ -191,7 +191,7 @@ public class Game {
                         actualPlayer.getNinjaFromBoard(i,j).setCanMove(true);
                         actualPlayer.getNinjaFromBoard(i,j).setHasActed(true);
                         playerAttacks();
-                        screen.println("Ataque realizado con exito");
+                        screen.println("\nAtaque realizado con exito");
 
                     }
                 }
@@ -213,7 +213,7 @@ public class Game {
         int destinationRow;
         Player actualPlayer = players[playerTurn];
 
-        screen.println("Indique coordenada a donde quiere mover el ninja");
+        screen.println("\nIndique coordenada a donde quiere mover el ninja");
 
         destinationColumn = columnInput();
         destinationRow = rowInput() ;
@@ -279,7 +279,6 @@ public class Game {
     }
 
     private boolean checkDeadOpponent(){
-        Player actualPlayer = players[playerTurn];
         Player opponent = players[playerTurn == 1 ? 0 : 1];
 
         return opponent.getBoard().getNinjasOnBoardQuantity() == 0;
