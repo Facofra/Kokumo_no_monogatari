@@ -23,9 +23,6 @@ public class Player {
         this.ninjas = new Ninja[numberOfNinjas];
     }
 
-    public void move(int direction){
-
-    }
 
     public void attack(int row, int column, Player opponent){
         Field[][] opponentBoard = opponent.getBoard().getFields();
@@ -73,9 +70,6 @@ public class Player {
 
     public Ninja getNinjaFromBoard(int row, int column){
         return board.getFields()[row][column].getNinja();
-    }
-    public void placeNinaOnBoard(int column, int row, Ninja ninja){
-        getBoard().placeNinja(column,row,ninja);
     }
 
     public boolean isCommanderAlive(){

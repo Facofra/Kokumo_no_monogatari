@@ -1,6 +1,7 @@
 import entities.*;
 import enums.GameMode;
 import enums.NinjaType;
+import managers.PlayerManager;
 
 import java.util.Scanner;
 
@@ -33,6 +34,10 @@ public class Game {
         screen.configurePlayer(players);
         screen.ninjaPlacement(players[playerTurn]);
 
+
+//        borrar testing, descomentar lo de arriba
+//        testing();
+
         while (playing){
             screen.println("\n***** Turno de " + players[playerTurn].getName() + " *****");
             screen.playerAction(players,playerTurn);
@@ -60,6 +65,41 @@ public class Game {
 
     private void exit(){
         System.exit(0);
+    }
+
+    private void testing(){
+        //        seteo de jugadores para probar
+        GameMode gameMode = GameMode.SERVER;
+        Board board = new Board(boardSize);
+        Board opponentBoard = new Board(boardSize);
+        Player player= new Player("Servidor","1", gameMode,board,opponentBoard,numberOfNinjas);
+
+        if (player.getGameMode() == GameMode.SERVER){
+            players[0] = player;
+        }else{
+            players[1] = player;
+        }
+
+        gameMode = GameMode.CLIENT;
+        Board newboard = new Board(boardSize);
+        Board newopponentBoard = new Board(boardSize);
+        Player newplayer= new Player("Cliente","2", gameMode,newboard,newopponentBoard,numberOfNinjas);
+
+        if (newplayer.getGameMode() == GameMode.SERVER){
+            players[0] = newplayer;
+        }else{
+            players[1] = newplayer;
+        }
+
+        //    colocacion de ninjas en tablero para cada uno
+        PlayerManager playerManager = new PlayerManager();
+
+        playerManager.placeNinjaOnBoard(0,0,new Ninja(NinjaType.COMMANDER),player);
+        playerManager.placeNinjaOnBoard(0,1,new Ninja(NinjaType.NORMAL),player);
+        playerManager.placeNinjaOnBoard(0,2,new Ninja(NinjaType.NORMAL),player);
+        playerManager.placeNinjaOnBoard(1,0,new Ninja(NinjaType.COMMANDER),newplayer);
+        playerManager.placeNinjaOnBoard(1,1,new Ninja(NinjaType.NORMAL),newplayer);
+        playerManager.placeNinjaOnBoard(1,2,new Ninja(NinjaType.NORMAL),newplayer);
     }
 
 
