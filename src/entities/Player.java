@@ -7,16 +7,14 @@ import java.util.List;
 
 public class Player {
     private String name;
-    private String ip;
     private Board board;
     private  Board opponentBoard;
     private Ninja[] ninjas;
     private GameMode gameMode;
 
 
-    public Player(String name, String ip, GameMode gameMode, Board board, Board opponentBoard, int numberOfNinjas) {
+    public Player(String name, GameMode gameMode, Board board, Board opponentBoard, int numberOfNinjas) {
         this.name = name;
-        this.ip = ip;
         this.gameMode = gameMode;
         this.board = board;
         this.opponentBoard = opponentBoard;
@@ -40,10 +38,6 @@ public class Player {
 
     public String getName() {
         return name;
-    }
-
-    public String getIp() {
-        return ip;
     }
 
     public Board getBoard() {

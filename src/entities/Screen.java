@@ -1,9 +1,14 @@
 package entities;
 
+import connection.Client;
+import connection.Message;
+import connection.MessageManager;
+import connection.Server;
 import enums.GameMode;
 import enums.NinjaType;
 import managers.PlayerManager;
 
+import java.net.InetAddress;
 import java.util.Scanner;
 
 public class Screen {
@@ -13,6 +18,7 @@ public class Screen {
     private PlayerManager playerManager;
     private int boardSize;
     private int numberOfNinjas;
+    private boolean goBack;
 
     public Screen(int boardSize, int numberOfNinjas, Validator validator) {
         this.boardSize = boardSize;
@@ -70,20 +76,21 @@ public class Screen {
     }
 
 //---------------------------- all screens -------------------------------------------------------------
-    public void configurePlayer(Player[] players){
-        println("\n(1) Servidor");
-        println("(2) Cliente");
-        println("(S) Salir");
-        print("Ejecutar como: ");
+    public void configurePlayer(Player[] players, Server server, Client client){
+        println("\n(1) Crear partida");
+        println("(2) Unirse a partida");
+        println("(S) Salir del juego");
+        println();
+        print("Elija opción: ");
         lineReader = input.nextLine();
-
+        println();
         if (lineReader.equals("s") || lineReader.equals("S")){
             println("¿Seguro que desear salir? (S/N)");
             char confirm= confirmInput();
             if (confirm =='S' || confirm == 's'){
                 exit();
             }else{
-                configurePlayer(players);
+                configurePlayer(players,server,client);
             }
 
         }
@@ -91,14 +98,27 @@ public class Screen {
             int mode = Integer.valueOf( lineReader);
 
             String name = nameInput();
-            String ip = ipInput();
+            server.setPlayerName(name);
 
-            playerManager.initializePlayer(players,mode,boardSize,name,ip,numberOfNinjas);
+            playerManager.initializePlayer(players,mode,boardSize,name,numberOfNinjas);
+            if (mode == 1){
+                serverScreen(server,client);
+                if (goBack){
+                    goBack=false;
+                    configurePlayer(players,server,client);
+                }
+            }else{
+                clientScreen(server,client);
+                if (goBack){
+                    goBack=false;
+                    configurePlayer(players,server,client);
+                }
+            }
 
         }else{
             println("Input incorrecto, debe ser 1, 2 o S");
             println();
-            configurePlayer(players);
+            configurePlayer(players,server,client);
         }
 
 
@@ -262,25 +282,204 @@ public class Screen {
 //            AVISAR AL JUGADOR SI FALLÓ o ATINÓ?
 
     }
+    private void serverScreen(Server server, Client client){
+        println("(1) Enviar solicitud para unirse");
+        println("(A) Atrás");
+        println("(S) Salir del juego");
+        println();
+        print("Elija opción: ");
+        lineReader = input.nextLine();
+        println();
+        if (lineReader.equals("s") || lineReader.equals("S")){
+            println("¿Seguro que desear salir? (S/N)");
+            char confirm= confirmInput();
+            if (confirm =='S' || confirm == 's'){
+                exit();
+            }else{
+                serverScreen(server,client);
+            }
 
+        }
+        else if (lineReader.equals("1") ){
+            print("Ingrese IP a invitar: ");
+            String ipOpponent = ipInput();
+            client.setIpOpponent(ipOpponent);
+
+
+            waitingConnection(server,client);
+
+            if (goBack){
+                goBack=false;
+                serverScreen(server,client);
+            }
+
+        }
+        else if (lineReader.toUpperCase().equals("A")){
+            goBack=true;
+        }
+        else{
+            println("Input incorrecto, debe ser 1 o S");
+            println();
+            serverScreen(server,client);
+        }
+
+    }
+    private void clientScreen(Server server, Client client){
+        println("(1) Ver solicitud para unirse");
+        println("(A) Atrás");
+        println("(S) Salir del juego");
+        println();
+        print("Elija opción: ");
+        lineReader = input.nextLine();
+        println();
+        if (lineReader.equals("s") || lineReader.equals("S")){
+            println("¿Seguro que desear salir? (S/N)");
+            char confirm= confirmInput();
+            if (confirm =='S' || confirm == 's'){
+                exit();
+            }else{
+                clientScreen(server,client);
+            }
+
+        }
+        else if (lineReader.equals("1") ){
+            print("Ingrese IP a unirse: ");
+            String ipOpponent = ipInput();
+            client.setIpOpponent(ipOpponent);
+
+            Message message = new Message();
+            message.setIp(ipOpponent);
+            message.setName(server.getPlayerName());
+            server.sendMessage(MessageManager.toJson(message));
+
+            println("########## estoy aquí ###############");
+            waitingForAcceptance(server,client);
+
+            if (goBack){
+                goBack=false;
+                clientScreen(server,client);
+            }
+
+        }
+        else if (lineReader.toUpperCase().equals("A")){
+            goBack=true;
+        }
+        else{
+            println("Input incorrecto, debe ser 1 ,S o A");
+            println();
+            clientScreen(server,client);
+        }
+    }
+    private void waitingForAcceptance(Server server, Client client){
+        boolean waiting = true;
+
+        while (waiting) {
+            println("(1) Ver si host me aceptó");
+            println("(A) Atrás");
+            println("(S) salir del juego");
+            print("Elija una opción: ");
+            lineReader = input.nextLine();
+
+            if (lineReader.equals("1")){
+                println("Chequeando si host aceptó, esto puede llevar un rato...");
+                println();
+                try {
+                    String response = client.recieveMessage();
+                    Message message = MessageManager.jsonToMessage(response);
+                    if (message.getIp().equals(server.getIp())){
+                        waiting=false;
+                        goBack=false;
+                        println("Host ha aceptado, nombre: " + message.getName());
+                    }else{
+                        println("Host todavía no aceptó");
+                    }
+                } catch (Exception ex) {
+                    println("Host todavía no conectado");
+                }
+            }
+            else if (lineReader.toUpperCase().equals("S")){
+                exit();
+            }else if (lineReader.toUpperCase().equals("A")){
+                goBack=true;
+            }
+            else {
+                println("Input inválido, debe ser 1 o S");
+            }
+
+        }
+    }
+    private void waitingConnection(Server server, Client client){
+        boolean waiting = true;
+        while (waiting) {
+            println("(1) Ver si oponente se conectó");
+            println("(A) Atrás");
+            println("(S) salir del juego");
+            print("Elija una opción: ");
+            lineReader = input.nextLine();
+
+            if (lineReader.equals("1")){
+                println("Chequeando si oponente se conectó, esto puede llevar un rato...");
+                println();
+                try {
+                    String response = client.recieveMessage();
+                    Message message = MessageManager.jsonToMessage(response);
+                    if (message.getIp().equals(server.getIp())){
+                        waiting=false;
+                        println("Oponente conectado, nombre: " + message.getName());
+                        println();
+                        print("¿Aceptarlo? (S/N): ");
+                        char confirm = confirmInput();
+                        if (confirm == 'S' || confirm == 's'){
+
+                            message.setIp(client.getIpOpponent());
+                            message.setName(server.getPlayerName());
+                            server.sendMessage(MessageManager.toJson(message));
+
+                        }else{
+                            println("Has negado la conexión, vuelves atrás");
+                            goBack=true;
+                        }
+
+                    }else{
+                        println("Oponente todavía no aceptó");
+                    }
+                } catch (Exception ex) {
+                    println("Oponente todavía no conectado");
+                }
+            }
+            else if (lineReader.toUpperCase().equals("S")){
+                exit();
+            }else if (lineReader.toUpperCase().equals("A")){
+                goBack=true;
+            }
+            else {
+                println("Input inválido, debe ser 1 o S");
+            }
+
+        }
+    }
 
 
     private String ipInput(){
-        print("Ingrese IP: ");
+        print("Ingrese IP del oponente: ");
         lineReader = input.nextLine();
-        while (lineReader.equals("")){
-            print("No puede estar vació. Ingrese IP: ");
+
+        while (! lineReader.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")){
+            print("No es una IP valida. Ingrese IP: ");
             lineReader = input.nextLine();
         }
+        println();
         return lineReader;
     }
     private String nameInput(){
-        print("Ingrese nombre de jugador: ");
+        print("Ingrese su nombre de jugador: ");
         lineReader = input.nextLine();
-        while (lineReader.equals("")){
-            print("No puede estar vació. Ingrese nombre: ");
+        while (lineReader.length() < 3 || lineReader.length() > 20){
+            println();
+            print("El nombre debe tener mínimo 3 caractéres y máximo 20 caractétes.\nIngrese nombre: ");
             lineReader = input.nextLine();
         }
+        println();
         return lineReader;
     }
     private int columnInput(){

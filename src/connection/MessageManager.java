@@ -3,17 +3,17 @@ package connection;
 import com.google.gson.Gson;
 
 public class MessageManager {
-    Gson gson;
+    static Gson gson = new Gson();
 
     public MessageManager(Gson gson) {
         this.gson = gson;
     }
 
-    public String toJson(Message message){
+    public static String toJson(Message message){
         return gson.toJson(message);
     }
 
-    public Message jsonToMessage(String json){
+    public static Message jsonToMessage(String json){
         return gson.fromJson(json,Message.class);
     }
 }

@@ -7,11 +7,11 @@ import enums.GameMode;
 
 public class PlayerManager {
 
-    public void initializePlayer(Player[] players, int mode,int boardSize, String name, String ip, int numberOfNinjas){
+    public void initializePlayer(Player[] players, int mode,int boardSize, String name, int numberOfNinjas){
         GameMode gameMode = mode == 1 ? GameMode.SERVER : GameMode.CLIENT;
         Board board = new Board(boardSize);
         Board opponentBoard = new Board(boardSize);
-        Player player= new Player(name,ip, gameMode,board,opponentBoard,numberOfNinjas);
+        Player player= new Player(name, gameMode,board,opponentBoard,numberOfNinjas);
 
         if (player.getGameMode() == GameMode.SERVER){
             players[0] = player;

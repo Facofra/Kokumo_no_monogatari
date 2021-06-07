@@ -1,3 +1,5 @@
+import connection.Client;
+import connection.Server;
 import entities.*;
 import enums.GameMode;
 import enums.NinjaType;
@@ -6,6 +8,8 @@ import managers.PlayerManager;
 import java.util.Scanner;
 
 public class Game {
+    private Server server;
+    private Client client;
     private Screen screen;
     private Player[] players;
     private Scanner input;
@@ -22,16 +26,27 @@ public class Game {
         this.numberOfNinjas = numberOfNinjas;
         this.validator = new Validator(boardSize, numberOfNinjas);
         screen = new Screen(boardSize, numberOfNinjas,validator);
+        this.server = new Server();
+        this.client = new Client();
 
     }
 
     public void run(){
         boolean playing = true;
-        screen.configurePlayer(players);
+
+        try{
+            server.start();
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
+
+        screen.configurePlayer(players,server,client);
+        playerTurn = players[0] == null ? 1:0;
         screen.ninjaPlacement(players[playerTurn]);
+        exit();
         nextTurn();
 
-        screen.configurePlayer(players);
+        screen.configurePlayer(players,server,client);
         screen.ninjaPlacement(players[playerTurn]);
 
 
@@ -72,7 +87,7 @@ public class Game {
         GameMode gameMode = GameMode.SERVER;
         Board board = new Board(boardSize);
         Board opponentBoard = new Board(boardSize);
-        Player player= new Player("Servidor","1", gameMode,board,opponentBoard,numberOfNinjas);
+        Player player= new Player("Servidor", gameMode,board,opponentBoard,numberOfNinjas);
 
         if (player.getGameMode() == GameMode.SERVER){
             players[0] = player;
@@ -83,7 +98,7 @@ public class Game {
         gameMode = GameMode.CLIENT;
         Board newboard = new Board(boardSize);
         Board newopponentBoard = new Board(boardSize);
-        Player newplayer= new Player("Cliente","2", gameMode,newboard,newopponentBoard,numberOfNinjas);
+        Player newplayer= new Player("Cliente", gameMode,newboard,newopponentBoard,numberOfNinjas);
 
         if (newplayer.getGameMode() == GameMode.SERVER){
             players[0] = newplayer;

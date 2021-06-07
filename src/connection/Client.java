@@ -58,10 +58,11 @@ public class Client {
         }
         return null;
     }
+    private String ipOpponent;
 
     public String recieveMessage(){
         try {
-            URL url = new URL("http://192.168.0.8:8000/");
+            URL url = new URL("http://"+ipOpponent+":8001/");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("accept", "application/json");
             InputStream responseStream = connection.getInputStream();
@@ -72,8 +73,15 @@ public class Client {
             return result;
 
         }catch (Exception ex){
-            System.out.println(ex.getMessage());
             return ex.getMessage();
         }
+    }
+
+    public String getIpOpponent() {
+        return ipOpponent;
+    }
+
+    public void setIpOpponent(String ipOpponent) {
+        this.ipOpponent = ipOpponent;
     }
 }
