@@ -4,11 +4,10 @@ import connection.Client;
 import connection.Message;
 import connection.MessageManager;
 import connection.Server;
-import enums.GameMode;
 import enums.NinjaType;
 import managers.PlayerManager;
+import validators.Validator;
 
-import java.net.InetAddress;
 import java.util.Scanner;
 
 public class Screen {
@@ -65,9 +64,6 @@ public class Screen {
     public void print(String text){
         System.out.print(text);
     }
-    public void print(char text){
-        System.out.print(text);
-    }
     public void println(String text){
         System.out.println(text);
     }
@@ -100,14 +96,19 @@ public class Screen {
             String name = nameInput();
             server.setPlayerName(name);
 
+
             playerManager.initializePlayer(players,mode,boardSize,name,numberOfNinjas);
             if (mode == 1){
+                server.setPort(8000);
+                client.setPort(8001);
                 serverScreen(server,client);
                 if (goBack){
                     goBack=false;
                     configurePlayer(players,server,client);
                 }
             }else{
+                server.setPort(8001);
+                client.setPort(8000);
                 clientScreen(server,client);
                 if (goBack){
                     goBack=false;
@@ -352,10 +353,10 @@ public class Screen {
             message.setName(server.getPlayerName());
             server.sendMessage(MessageManager.toJson(message));
 
-            println("########## estoy aquí ###############");
             waitingForAcceptance(server,client);
 
             if (goBack){
+                println("########## estoy aquí ###############");
                 goBack=false;
                 clientScreen(server,client);
             }
@@ -400,6 +401,7 @@ public class Screen {
             else if (lineReader.toUpperCase().equals("S")){
                 exit();
             }else if (lineReader.toUpperCase().equals("A")){
+                waiting=false;
                 goBack=true;
             }
             else {
@@ -450,6 +452,7 @@ public class Screen {
             else if (lineReader.toUpperCase().equals("S")){
                 exit();
             }else if (lineReader.toUpperCase().equals("A")){
+                waiting=false;
                 goBack=true;
             }
             else {
@@ -458,10 +461,25 @@ public class Screen {
 
         }
     }
+    public void waitingScreen(Client client){
+        println("Esperando que el oponente termine... ");
+        Message message = new Message();
+        message = MessageManager.jsonToMessage( client.recieveMessage() );
+        while (message.getIp() == client.getIpOpponent() ){
+            try {
+                Thread.sleep(10000);
+            } catch (Exception ex) {
+                println("Presione enter para ver si oponente terminó.");
+                input.nextLine();
+            }
+            message = MessageManager.jsonToMessage( client.recieveMessage() );
 
+        }
+        println("Oponente ha terminado.\n");
+
+    }
 
     private String ipInput(){
-        print("Ingrese IP del oponente: ");
         lineReader = input.nextLine();
 
         while (! lineReader.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")){

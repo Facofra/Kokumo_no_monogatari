@@ -1,4 +1,7 @@
-package entities;
+package validators;
+
+import entities.Field;
+import entities.Player;
 
 public class Validator {
     private int boardSize;

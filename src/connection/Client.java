@@ -59,10 +59,11 @@ public class Client {
         return null;
     }
     private String ipOpponent;
+    private int port;
 
     public String recieveMessage(){
         try {
-            URL url = new URL("http://"+ipOpponent+":8001/");
+            URL url = new URL("http://"+ipOpponent+":"+port+"/");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestProperty("accept", "application/json");
             InputStream responseStream = connection.getInputStream();
@@ -83,5 +84,9 @@ public class Client {
 
     public void setIpOpponent(String ipOpponent) {
         this.ipOpponent = ipOpponent;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

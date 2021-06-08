@@ -14,9 +14,10 @@ public class Server {
     HttpServer server;
     private String ip;
     private String playerName;
+    private int port;
 
     public void start() throws Exception {
-        server = HttpServer.create(new InetSocketAddress(8000), 0);
+        server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", messageHandler);
         server.setExecutor(null);
         server.start();
@@ -45,5 +46,9 @@ public class Server {
 
     public void setPlayerName(String playerName) {
         this.playerName = playerName;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

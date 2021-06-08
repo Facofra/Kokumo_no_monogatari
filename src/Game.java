@@ -4,6 +4,7 @@ import entities.*;
 import enums.GameMode;
 import enums.NinjaType;
 import managers.PlayerManager;
+import validators.Validator;
 
 import java.util.Scanner;
 
@@ -43,11 +44,9 @@ public class Game {
         screen.configurePlayer(players,server,client);
         playerTurn = players[0] == null ? 1:0;
         screen.ninjaPlacement(players[playerTurn]);
-        exit();
-        nextTurn();
-
-        screen.configurePlayer(players,server,client);
-        screen.ninjaPlacement(players[playerTurn]);
+        if (playerTurn==1){
+            screen.waitingScreen(client);
+        }
 
 
 //        borrar testing, descomentar lo de arriba
