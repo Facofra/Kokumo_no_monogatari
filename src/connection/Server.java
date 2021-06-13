@@ -11,22 +11,19 @@ import java.net.InetSocketAddress;
 
 public class Server {
     MessageHandler messageHandler = new MessageHandler();
+    WaitingHandler waitingHandler = new WaitingHandler();
     HttpServer server;
     private String ip;
     private String playerName;
-    private int port;
+    private int port=8000;
 
     public void start() throws Exception {
         server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", messageHandler);
+        server.createContext("/waiting",waitingHandler );
         server.setExecutor(null);
         server.start();
 
-        try {
-            ip = InetAddress.getLocalHost().getHostAddress();;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
     }
     public void sendMessage(String message){
         messageHandler.setMessage(message);
@@ -51,4 +48,9 @@ public class Server {
     public void setPort(int port) {
         this.port = port;
     }
+
+    public void stop(){
+        server.stop(0);
+    }
+
 }

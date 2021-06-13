@@ -1,9 +1,6 @@
 package entities;
 
-import connection.Client;
-import connection.Message;
-import connection.MessageManager;
-import connection.Server;
+import connection.*;
 import enums.NinjaType;
 import managers.PlayerManager;
 import validators.Validator;
@@ -95,25 +92,32 @@ public class Screen {
 
             String name = nameInput();
             server.setPlayerName(name);
-
+            print("Ingrese su ip: ");
+            server.setIp(ipInput());
 
             playerManager.initializePlayer(players,mode,boardSize,name,numberOfNinjas);
             if (mode == 1){
                 server.setPort(8000);
                 client.setPort(8001);
-                serverScreen(server,client);
-                if (goBack){
-                    goBack=false;
-                    configurePlayer(players,server,client);
+                try{
+                    server.start();
+                }catch (Exception ex){
+                    System.out.println(ex.getMessage());
                 }
+                serverScreen(server,client);
             }else{
                 server.setPort(8001);
                 client.setPort(8000);
-                clientScreen(server,client);
-                if (goBack){
-                    goBack=false;
-                    configurePlayer(players,server,client);
+                try{
+                    server.start();
+                }catch (Exception ex){
+                    System.out.println(ex.getMessage());
                 }
+                clientScreen(server,client);
+            }
+            if (goBack){
+                goBack=false;
+                configurePlayer(players,server,client);
             }
 
         }else{
@@ -172,7 +176,9 @@ public class Screen {
     }
     public void playerAction(Player[] players, int playerTurn ){
         Player actualPlayer = players[playerTurn];
-
+        Message message = new Message();
+        String[] attacks = {"","",""};
+        int atackCounter=0;
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
                 if (playerManager.getNinjaFromBoard(i,j,actualPlayer) != null && ! playerManager.getNinjaHasActed(i,j,actualPlayer)){
@@ -206,10 +212,10 @@ public class Screen {
                         }
                     }
                     if (lineReader.equals("A") || lineReader.equals("a")){
-//                        actualPlayer.getNinjaFromBoard(i,j).setCanMove(true);
+
                         playerManager.setNinjaCanMove(true,i,j,actualPlayer);
                         playerManager.setNinjaHasActed(true,i,j,actualPlayer);
-//                        actualPlayer.getNinjaFromBoard(i,j).setHasActed(true);
+
                         playerAttacks(players,playerTurn);
                         println("\nAtaque realizado con exito");
 
@@ -316,6 +322,9 @@ public class Screen {
 
         }
         else if (lineReader.toUpperCase().equals("A")){
+            try {
+                server.stop();
+            } catch (Exception ex) {}
             goBack=true;
         }
         else{
@@ -351,18 +360,19 @@ public class Screen {
             Message message = new Message();
             message.setIp(ipOpponent);
             message.setName(server.getPlayerName());
+            message.setWaiting(true);
             server.sendMessage(MessageManager.toJson(message));
 
             waitingForAcceptance(server,client);
 
             if (goBack){
-                println("########## estoy aquí ###############");
                 goBack=false;
                 clientScreen(server,client);
             }
 
         }
         else if (lineReader.toUpperCase().equals("A")){
+            server.stop();
             goBack=true;
         }
         else{
@@ -395,7 +405,7 @@ public class Screen {
                         println("Host todavía no aceptó");
                     }
                 } catch (Exception ex) {
-                    println("Host todavía no conectado");
+                    println("Host todavía no aceptó");
                 }
             }
             else if (lineReader.toUpperCase().equals("S")){
@@ -435,6 +445,7 @@ public class Screen {
 
                             message.setIp(client.getIpOpponent());
                             message.setName(server.getPlayerName());
+                            message.setWaiting(true);
                             server.sendMessage(MessageManager.toJson(message));
 
                         }else{
@@ -463,9 +474,9 @@ public class Screen {
     }
     public void waitingScreen(Client client){
         println("Esperando que el oponente termine... ");
-        Message message = new Message();
+        Message message;
         message = MessageManager.jsonToMessage( client.recieveMessage() );
-        while (message.getIp() == client.getIpOpponent() ){
+        while (message.isWaiting() == true ){
             try {
                 Thread.sleep(10000);
             } catch (Exception ex) {
@@ -475,8 +486,23 @@ public class Screen {
             message = MessageManager.jsonToMessage( client.recieveMessage() );
 
         }
+
         println("Oponente ha terminado.\n");
 
+    }
+    public void waitingScreen(){
+        println("Esperando que el oponente termine... ");
+        while (WaitingHandler.isWaiting()){
+            try {
+                Thread.sleep(2000);
+            } catch (Exception ex) {
+                println("Presione enter para ver si oponente terminó.");
+                input.nextLine();
+            }
+        }
+        WaitingHandler.setWaiting(true);
+
+        println("Oponente ha terminado.\n");
     }
 
     private String ipInput(){

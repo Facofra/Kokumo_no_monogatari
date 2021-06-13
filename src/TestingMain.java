@@ -1,6 +1,4 @@
-
-
-public class Main {
+public class TestingMain {
     public static void main(String[] args) {
 
 
@@ -11,5 +9,4 @@ public class Main {
         game.run();
 
     }
-
 }

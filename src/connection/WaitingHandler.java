@@ -6,7 +6,7 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class MessageHandler implements HttpHandler {
+public class WaitingHandler implements HttpHandler {
     private String message="Bienvenido";
     private static boolean waiting=true;
 
@@ -16,6 +16,7 @@ public class MessageHandler implements HttpHandler {
         OutputStream os = t.getResponseBody();
         os.write(response.getBytes());
         os.close();
+
         waiting=false;
     }
 
@@ -32,6 +33,6 @@ public class MessageHandler implements HttpHandler {
     }
 
     public static void setWaiting(boolean waiting) {
-        MessageHandler.waiting = waiting;
+        WaitingHandler.waiting = waiting;
     }
 }

@@ -1,5 +1,4 @@
-import connection.Client;
-import connection.Server;
+import connection.*;
 import entities.*;
 import enums.GameMode;
 import enums.NinjaType;
@@ -15,7 +14,6 @@ public class Game {
     private Player[] players;
     private Scanner input;
     private Validator validator;
-    private String lineReader;
     private int playerTurn;
     private final int boardSize;
     private final int numberOfNinjas;
@@ -34,30 +32,61 @@ public class Game {
 
     public void run(){
         boolean playing = true;
-
-        try{
-            server.start();
-        }catch (Exception ex){
-            System.out.println(ex.getMessage());
-        }
+        Message message = new Message();
+        String jsonMessage;
 
         screen.configurePlayer(players,server,client);
-        playerTurn = players[0] == null ? 1:0;
-        screen.ninjaPlacement(players[playerTurn]);
-        if (playerTurn==1){
-            screen.waitingScreen(client);
+
+        if (players[0]==null){
+            screen.ninjaPlacement(players[1]);
+            message.setPlayer(players[1]);
+            jsonMessage = MessageManager.toJson(message);
+            server.sendMessage(jsonMessage);
+            client.informEndTurn();
+
+            WaitingHandler.setWaiting(true);
+            screen.waitingScreen();
+
+            jsonMessage = client.recieveMessage();
+            message = MessageManager.jsonToMessage(jsonMessage);
+            players[0] = message.getPlayer();
+            WaitingHandler.setWaiting(true);
+            screen.println("Se recibió información del host.");
+            screen.waitingScreen();
+            playerTurn=1;
+
+//            recibir jugador con primero ataques de oponente
+            jsonMessage = client.recieveMessage();
+            message = MessageManager.jsonToMessage(jsonMessage);
+            players[1] = message.getPlayer();
+        }else{
+            WaitingHandler.setWaiting(true);
+            screen.ninjaPlacement(players[0]);
+            screen.waitingScreen();
+            jsonMessage = client.recieveMessage();
+            message = MessageManager.jsonToMessage(jsonMessage);
+            players[1] = message.getPlayer();
+
+            message.setPlayer(players[0]);
+            jsonMessage = MessageManager.toJson(message);
+            server.sendMessage(jsonMessage);
+            client.informEndTurn();
         }
 
-
-//        borrar testing, descomentar lo de arriba
-//        testing();
-
         while (playing){
-            screen.println("\n***** Turno de " + players[playerTurn].getName() + " *****");
-            screen.playerAction(players,playerTurn);
-            playing= ! checkDeadOpponent();
+            screen.println("\n***** Tu Turno " + players[playerTurn].getName() + " *****");
 
-            nextTurn();
+            screen.playerAction(players,playerTurn);
+
+            playing= ! checkDeadOpponent();
+            if (playing){
+                message.setPlayer(players[playerTurn==0?1:0]);
+                jsonMessage = MessageManager.toJson(message);
+                server.sendMessage(jsonMessage);
+                client.informEndTurn();
+                screen.waitingScreen();
+            }
+
         }
         endGame();
     }
@@ -81,40 +110,6 @@ public class Game {
         System.exit(0);
     }
 
-    private void testing(){
-        //        seteo de jugadores para probar
-        GameMode gameMode = GameMode.SERVER;
-        Board board = new Board(boardSize);
-        Board opponentBoard = new Board(boardSize);
-        Player player= new Player("Servidor", gameMode,board,opponentBoard,numberOfNinjas);
-
-        if (player.getGameMode() == GameMode.SERVER){
-            players[0] = player;
-        }else{
-            players[1] = player;
-        }
-
-        gameMode = GameMode.CLIENT;
-        Board newboard = new Board(boardSize);
-        Board newopponentBoard = new Board(boardSize);
-        Player newplayer= new Player("Cliente", gameMode,newboard,newopponentBoard,numberOfNinjas);
-
-        if (newplayer.getGameMode() == GameMode.SERVER){
-            players[0] = newplayer;
-        }else{
-            players[1] = newplayer;
-        }
-
-        //    colocacion de ninjas en tablero para cada uno
-        PlayerManager playerManager = new PlayerManager();
-
-        playerManager.placeNinjaOnBoard(0,0,new Ninja(NinjaType.COMMANDER),player);
-        playerManager.placeNinjaOnBoard(0,1,new Ninja(NinjaType.NORMAL),player);
-        playerManager.placeNinjaOnBoard(0,2,new Ninja(NinjaType.NORMAL),player);
-        playerManager.placeNinjaOnBoard(1,0,new Ninja(NinjaType.COMMANDER),newplayer);
-        playerManager.placeNinjaOnBoard(1,1,new Ninja(NinjaType.NORMAL),newplayer);
-        playerManager.placeNinjaOnBoard(1,2,new Ninja(NinjaType.NORMAL),newplayer);
-    }
 
 
 }
