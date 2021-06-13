@@ -39,6 +39,7 @@ public class Game {
 
         if (players[0]==null){
             screen.ninjaPlacement(players[1]);
+//            envío jugador al oponente avisando que terminé
             message.setPlayer(players[1]);
             jsonMessage = MessageManager.toJson(message);
             server.sendMessage(jsonMessage);
@@ -46,7 +47,7 @@ public class Game {
 
             WaitingHandler.setWaiting(true);
             screen.waitingScreen();
-
+//          recibo jugador oponente
             jsonMessage = client.recieveMessage();
             message = MessageManager.jsonToMessage(jsonMessage);
             players[0] = message.getPlayer();
@@ -55,24 +56,28 @@ public class Game {
             screen.waitingScreen();
             playerTurn=1;
 
-//            recibir jugador con primero ataques de oponente
+//            recibir boards con primeros ataques de oponente
             jsonMessage = client.recieveMessage();
             message = MessageManager.jsonToMessage(jsonMessage);
-            players[1] = message.getPlayer();
+            players[0].setBoard(message.getBoardPlayer1());
+            players[1].setBoard(message.getBoardPlayer2());
+
         }else{
             WaitingHandler.setWaiting(true);
             screen.ninjaPlacement(players[0]);
             screen.waitingScreen();
+//      recibo jugador oponente
             jsonMessage = client.recieveMessage();
             message = MessageManager.jsonToMessage(jsonMessage);
             players[1] = message.getPlayer();
-
+//      envío mi jugador al oponente
             message.setPlayer(players[0]);
             jsonMessage = MessageManager.toJson(message);
             server.sendMessage(jsonMessage);
             client.informEndTurn();
         }
 
+//        comienzan los turnos
         while (playing){
             screen.println("\n***** Tu Turno " + players[playerTurn].getName() + " *****");
 
@@ -80,24 +85,48 @@ public class Game {
 
             playing= ! checkDeadOpponent();
             if (playing){
-                message.setPlayer(players[playerTurn==0?1:0]);
+//                mandar ataque hecho
+                message.setBoardPlayer1(players[0].getBoard());
+                message.setBoardPlayer2(players[1].getBoard());
                 jsonMessage = MessageManager.toJson(message);
                 server.sendMessage(jsonMessage);
                 client.informEndTurn();
+                screen.println("\n Fin de tu turno.\n");
                 screen.waitingScreen();
+//                recibir ataques hechos
+                jsonMessage = client.recieveMessage();
+                message = MessageManager.jsonToMessage(jsonMessage);
+                players[0].setBoard(message.getBoardPlayer1());
+                players[1].setBoard(message.getBoardPlayer2());
+                playing= message.isPlaying();
+
             }
 
         }
-        endGame();
+        if (players[playerTurn].getBoard().getNinjasOnBoardQuantity() !=0){
+            message.setPlaying(false);
+            jsonMessage = MessageManager.toJson(message);
+            server.sendMessage(jsonMessage);
+            client.informEndTurn();
+        }else{
+            nextTurn();
+        }
+        endGame(playerTurn);
     }
 
     public void nextTurn(){
         playerTurn = playerTurn == 1 ? 0 : 1;
     }
-    public void endGame(){
-        nextTurn();
+    public void endGame(int winner){
+
+
         screen.println("\nEl juego terminó");
-        screen.println("Ganador: *** "+ players[playerTurn].getName() + " ***");
+        screen.println("Ganador: *** "+ players[winner].getName() + " ***");
+        try {
+            Thread.sleep(2000);
+        } catch (Exception ex) {}
+        server.stop();
+        exit();
     }
     private boolean checkDeadOpponent(){
         Player opponent = players[playerTurn == 1 ? 0 : 1];

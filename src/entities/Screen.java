@@ -5,6 +5,8 @@ import enums.NinjaType;
 import managers.PlayerManager;
 import validators.Validator;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Screen {
@@ -176,9 +178,8 @@ public class Screen {
     }
     public void playerAction(Player[] players, int playerTurn ){
         Player actualPlayer = players[playerTurn];
-        Message message = new Message();
-        String[] attacks = {"","",""};
-        int atackCounter=0;
+        List<String> attackMessages = new ArrayList<>();
+
         for (int i = 0; i < boardSize; i++) {
             for (int j = 0; j < boardSize; j++) {
                 if (playerManager.getNinjaFromBoard(i,j,actualPlayer) != null && ! playerManager.getNinjaHasActed(i,j,actualPlayer)){
@@ -193,8 +194,9 @@ public class Screen {
                     lineReader = input.nextLine();
 
                     while (! validator.validatePlayerAction(lineReader)){
-                        println("Error, debe colocar una acción válida (M, A, S)");
-                        print("¿Que desea hacer?: ");
+                        println("\nError, debe colocar una acción válida (M, A, S)");
+                        println("\nNinja de Fila: " + (i+1) + " Columna: " + columnIntToChar(j));
+                        print("\n¿Que desea hacer?: ");
                         lineReader = input.nextLine();
                     }
 
@@ -216,13 +218,25 @@ public class Screen {
                         playerManager.setNinjaCanMove(true,i,j,actualPlayer);
                         playerManager.setNinjaHasActed(true,i,j,actualPlayer);
 
-                        playerAttacks(players,playerTurn);
+                        playerAttacks(players,playerTurn,attackMessages);
                         println("\nAtaque realizado con exito");
 
                     }
                 }
             }
         }
+//  dar mensajes, y desmarcar casilla de capitán si sigue vivo
+        println();
+        for (String message:attackMessages) {
+            if (message.matches("[0-9]{2}")){
+                int row = Integer.valueOf( message.substring(0,1) );
+                int column = Integer.valueOf( message.substring(1,2) );
+                playerManager.setTargetTransitable(true,row,column,actualPlayer);
+            }else {
+                System.out.println(message);
+            }
+        }
+        attackMessages.clear();
 
 //  resetear el hasActed a false, es una solución momentanea.
         for (int i = 0; i < boardSize; i++) {
@@ -258,19 +272,20 @@ public class Screen {
         }
 
     }
-    private void playerAttacks(Player[] players, int playerTurn){
+    private void playerAttacks(Player[] players, int playerTurn, List<String> attackMessages){
         Player actualPlayer = players[playerTurn];
         Player opponent = players[playerTurn == 1 ? 0 : 1];
         int row;
         int column;
 
+        println("\n  -- Tablero de ataque --\n");
         renderBoard(actualPlayer.getOpponentBoard());
         println("Ingrese coordenada a atacar.");
         column = columnInput();
         row = rowInput();
 
         while (! playerManager.isTargetTransitable(row,column,actualPlayer)){
-            println("Esa coordenada ya ha sido atacada.");
+            println("\nEsa coordenada ya ha sido atacada.\n");
             println("Ingrese otra coordenada a atacar.");
             column = columnInput();
             row = rowInput();
@@ -279,14 +294,19 @@ public class Screen {
 
         if (playerManager.getNinjaFromBoard(row,column,opponent) == null){
             playerManager.setTransitable(false,row,column,opponent);
+            attackMessages.add("- Atacaste a espacio vacío");
         }else {
             playerManager.getNinjaFromBoard(row,column,opponent).recieveAttack();
             if (playerManager.getNinjaFromBoard(row,column,opponent).getLives()==0){
                 playerManager.killNinja(row,column,opponent);
+                attackMessages.add("- Mataste un ninja");
+            }else{
+                attackMessages.add("- Atacaste un ninja");
+//                este mensaje no se dará al usuario, es para desmarcar donde había un capitán
+                attackMessages.add(""+row+""+column);
             }
         }
 
-//            AVISAR AL JUGADOR SI FALLÓ o ATINÓ?
 
     }
     private void serverScreen(Server server, Client client){
@@ -360,7 +380,6 @@ public class Screen {
             Message message = new Message();
             message.setIp(ipOpponent);
             message.setName(server.getPlayerName());
-            message.setWaiting(true);
             server.sendMessage(MessageManager.toJson(message));
 
             waitingForAcceptance(server,client);
@@ -392,7 +411,7 @@ public class Screen {
             lineReader = input.nextLine();
 
             if (lineReader.equals("1")){
-                println("Chequeando si host aceptó, esto puede llevar un rato...");
+                println("\nChequeando si host aceptó, esto puede llevar un rato...");
                 println();
                 try {
                     String response = client.recieveMessage();
@@ -430,7 +449,7 @@ public class Screen {
             lineReader = input.nextLine();
 
             if (lineReader.equals("1")){
-                println("Chequeando si oponente se conectó, esto puede llevar un rato...");
+                println("\nChequeando si oponente se conectó, esto puede llevar un rato...");
                 println();
                 try {
                     String response = client.recieveMessage();
@@ -445,7 +464,6 @@ public class Screen {
 
                             message.setIp(client.getIpOpponent());
                             message.setName(server.getPlayerName());
-                            message.setWaiting(true);
                             server.sendMessage(MessageManager.toJson(message));
 
                         }else{
@@ -472,26 +490,9 @@ public class Screen {
 
         }
     }
-    public void waitingScreen(Client client){
-        println("Esperando que el oponente termine... ");
-        Message message;
-        message = MessageManager.jsonToMessage( client.recieveMessage() );
-        while (message.isWaiting() == true ){
-            try {
-                Thread.sleep(10000);
-            } catch (Exception ex) {
-                println("Presione enter para ver si oponente terminó.");
-                input.nextLine();
-            }
-            message = MessageManager.jsonToMessage( client.recieveMessage() );
 
-        }
-
-        println("Oponente ha terminado.\n");
-
-    }
     public void waitingScreen(){
-        println("Esperando que el oponente termine... ");
+        println("\nEsperando que el oponente termine... ");
         while (WaitingHandler.isWaiting()){
             try {
                 Thread.sleep(2000);

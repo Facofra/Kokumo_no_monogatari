@@ -9,7 +9,6 @@ public class Player {
     private String name;
     private Board board;
     private  Board opponentBoard;
-    private Ninja[] ninjas;
     private GameMode gameMode;
 
 
@@ -18,18 +17,6 @@ public class Player {
         this.gameMode = gameMode;
         this.board = board;
         this.opponentBoard = opponentBoard;
-        this.ninjas = new Ninja[numberOfNinjas];
-    }
-
-
-    public void attack(int row, int column, Player opponent){
-        Field[][] opponentBoard = opponent.getBoard().getFields();
-        if (opponentBoard[row][column] == null ){
-            opponentBoard[row][column].setTransitable(false);
-        } else{
-            opponentBoard[row][column].setNinja(null);
-        }
-
     }
 
     public int getNinjasOnBoardQuantity(){
@@ -44,22 +31,16 @@ public class Player {
         return board;
     }
 
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
     public GameMode getGameMode() {
         return gameMode;
     }
 
     public Board getOpponentBoard() {
         return opponentBoard;
-    }
-
-    public Ninja[] getNinjas() {
-        return ninjas;
-    }
-
-    public void setNinja(int index, Ninja ninja, int row, int column) {
-        ninja.setColumnPosition(column);
-        ninja.setRowPosition(row);
-        ninjas[index] = ninja;
     }
 
     public Ninja getNinjaFromBoard(int row, int column){

@@ -74,7 +74,7 @@ public class Validator {
 
     public boolean validateCanMove(Player actualPlayer, int i, int j){
         if (! actualPlayer.isCommanderAlive()){
-            message="Ninja no se puede mover, Comandante no está vivo.";
+            message="\nNinja no se puede mover, Comandante no está vivo.";
             return false;
         }
         if (! actualPlayer.getNinjaFromBoard(i,j).isCanMove()){

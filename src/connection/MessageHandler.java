@@ -8,7 +8,6 @@ import java.io.OutputStream;
 
 public class MessageHandler implements HttpHandler {
     private String message="Bienvenido";
-    private static boolean waiting=true;
 
     public void handle(HttpExchange t) throws IOException {
         String response = message;
@@ -16,7 +15,6 @@ public class MessageHandler implements HttpHandler {
         OutputStream os = t.getResponseBody();
         os.write(response.getBytes());
         os.close();
-        waiting=false;
     }
 
     public String getMessage() {
@@ -27,11 +25,4 @@ public class MessageHandler implements HttpHandler {
         this.message = message;
     }
 
-    public static boolean isWaiting() {
-        return waiting;
-    }
-
-    public static void setWaiting(boolean waiting) {
-        MessageHandler.waiting = waiting;
-    }
 }
