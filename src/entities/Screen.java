@@ -80,7 +80,7 @@ public class Screen {
         lineReader = input.nextLine();
         println();
         if (lineReader.equals("s") || lineReader.equals("S")){
-            println("¿Seguro que desear salir? (S/N)");
+            print("¿Seguro que desear salir? (S/N): ");
             char confirm= confirmInput();
             if (confirm =='S' || confirm == 's'){
                 exit();
@@ -189,7 +189,7 @@ public class Screen {
 
                     println("(M) Mover ");
                     println("(A) Atacar ");
-                    println("(S) Salir ");
+                    println("(S) Salir del juego ");
                     print("¿Que desea hacer?: ");
                     lineReader = input.nextLine();
 
@@ -201,7 +201,13 @@ public class Screen {
                     }
 
                     if (lineReader.equals("S") || lineReader.equals("s")){
-                        exit();
+                        print("¿Seguro que desear salir? (S/N): ");
+                        char confirm= confirmInput();
+                        if (confirm =='S' || confirm == 's'){
+                            exit();
+                        }else{
+                            j--;
+                        }
                     }
                     if (lineReader.equals("M") || lineReader.equals("m")){
                         if (validator.validateCanMove(actualPlayer,i,j)){
@@ -278,7 +284,7 @@ public class Screen {
         int row;
         int column;
 
-        println("\n  -- Tablero de ataque --\n");
+        println("\n  -- Tablero de ataque --");
         renderBoard(actualPlayer.getOpponentBoard());
         println("Ingrese coordenada a atacar.");
         column = columnInput();
@@ -318,7 +324,7 @@ public class Screen {
         lineReader = input.nextLine();
         println();
         if (lineReader.equals("s") || lineReader.equals("S")){
-            println("¿Seguro que desear salir? (S/N)");
+            print("¿Seguro que desear salir? (S/N): ");
             char confirm= confirmInput();
             if (confirm =='S' || confirm == 's'){
                 exit();
@@ -363,7 +369,7 @@ public class Screen {
         lineReader = input.nextLine();
         println();
         if (lineReader.equals("s") || lineReader.equals("S")){
-            println("¿Seguro que desear salir? (S/N)");
+            print("¿Seguro que desear salir? (S/N): ");
             char confirm= confirmInput();
             if (confirm =='S' || confirm == 's'){
                 exit();
@@ -407,8 +413,9 @@ public class Screen {
             println("(1) Ver si host me aceptó");
             println("(A) Atrás");
             println("(S) salir del juego");
-            print("Elija una opción: ");
+            print("\nElija una opción: ");
             lineReader = input.nextLine();
+            println();
 
             if (lineReader.equals("1")){
                 println("\nChequeando si host aceptó, esto puede llevar un rato...");
@@ -428,7 +435,11 @@ public class Screen {
                 }
             }
             else if (lineReader.toUpperCase().equals("S")){
-                exit();
+                print("¿Seguro que desear salir? (S/N): ");
+                char confirm= confirmInput();
+                if (confirm =='S' || confirm == 's'){
+                    exit();
+                }
             }else if (lineReader.toUpperCase().equals("A")){
                 waiting=false;
                 goBack=true;
@@ -479,7 +490,11 @@ public class Screen {
                 }
             }
             else if (lineReader.toUpperCase().equals("S")){
-                exit();
+                print("¿Seguro que desear salir? (S/N): ");
+                char confirm= confirmInput();
+                if (confirm =='S' || confirm == 's'){
+                    exit();
+                }
             }else if (lineReader.toUpperCase().equals("A")){
                 waiting=false;
                 goBack=true;
@@ -502,6 +517,7 @@ public class Screen {
             }
         }
         WaitingHandler.setWaiting(true);
+
 
         println("Oponente ha terminado.\n");
     }

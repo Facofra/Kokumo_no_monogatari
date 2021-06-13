@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Kokumo_no_monogatari:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Kokumo_no_monogatari_jar</output-path>
+    <root id="archive" name="Kokumo_no_monogatari.jar">
+      <element id="module-output" name="Kokumo_no_monogatari" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/gson-2.8.5.jar" path-in-jar="/" />
+      <element id="library" level="project" name="gson-2.8.5" />
+    </root>
+  </artifact>
+</component>

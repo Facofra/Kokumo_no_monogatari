@@ -126,6 +126,8 @@ public class Game {
             Thread.sleep(2000);
         } catch (Exception ex) {}
         server.stop();
+        screen.println("\nPresione enter para salir.");
+        input.nextLine();
         exit();
     }
     private boolean checkDeadOpponent(){
