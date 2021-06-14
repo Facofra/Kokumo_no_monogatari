@@ -1,8 +1,5 @@
 import connection.*;
 import entities.*;
-import enums.GameMode;
-import enums.NinjaType;
-import managers.PlayerManager;
 import validators.Validator;
 
 import java.util.Scanner;
@@ -61,6 +58,9 @@ public class Game {
             message = MessageManager.jsonToMessage(jsonMessage);
             players[0].setBoard(message.getBoardPlayer1());
             players[1].setBoard(message.getBoardPlayer2());
+            if (message.isCaptainAttacked()){
+                screen.println("\nEl capitán fue atacado !!!\n");
+            }
 
         }else{
             WaitingHandler.setWaiting(true);
@@ -80,8 +80,9 @@ public class Game {
 //        comienzan los turnos
         while (playing){
             screen.println("\n***** Tu Turno " + players[playerTurn].getName() + " *****");
+            message.setCaptainAttacked(false);
 
-            screen.playerAction(players,playerTurn);
+            screen.playerAction(players,playerTurn,message);
 
             playing= ! checkDeadOpponent();
             if (playing){
@@ -98,6 +99,9 @@ public class Game {
                 message = MessageManager.jsonToMessage(jsonMessage);
                 players[0].setBoard(message.getBoardPlayer1());
                 players[1].setBoard(message.getBoardPlayer2());
+                if (message.isCaptainAttacked()){
+                    screen.println("\nEl capitán fue atacado !!!\n");
+                }
                 playing= message.isPlaying();
 
             }

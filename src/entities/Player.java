@@ -3,8 +3,6 @@ package entities;
 import enums.GameMode;
 import enums.NinjaType;
 
-import java.util.List;
-
 public class Player {
     private String name;
     private Board board;

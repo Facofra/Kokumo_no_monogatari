@@ -34,22 +34,6 @@ public class Ninja {
         return sprite;
     }
 
-    public int getRowPosition() {
-        return rowPosition;
-    }
-
-    public void setRowPosition(int rowPosition) {
-        this.rowPosition = rowPosition;
-    }
-
-    public int getColumnPosition() {
-        return columnPosition;
-    }
-
-    public void setColumnPosition(int columnPosition) {
-        this.columnPosition = columnPosition;
-    }
-
     public NinjaType getNinjaType() {
         return ninjaType;
     }

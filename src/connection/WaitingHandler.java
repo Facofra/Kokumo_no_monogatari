@@ -20,14 +20,6 @@ public class WaitingHandler implements HttpHandler {
         waiting=false;
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public static boolean isWaiting() {
         return waiting;
     }

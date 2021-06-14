@@ -6,11 +6,11 @@ import entities.Player;
 public class Message {
     private String ip;
     private String name;
-    private boolean waiting;
     private Player player;
     private Board boardPlayer1;
     private Board boardPlayer2;
     private boolean playing=true;
+    private boolean captainAttacked;
 
     public boolean isPlaying() {
         return playing;
@@ -18,6 +18,14 @@ public class Message {
 
     public void setPlaying(boolean playing) {
         this.playing = playing;
+    }
+
+    public boolean isCaptainAttacked() {
+        return captainAttacked;
+    }
+
+    public void setCaptainAttacked(boolean captainAttacked) {
+        this.captainAttacked = captainAttacked;
     }
 
     public Board getBoardPlayer1() {
@@ -50,14 +58,6 @@ public class Message {
 
     public void setIp(String ip) {
         this.ip = ip;
-    }
-
-    public boolean isWaiting() {
-        return waiting;
-    }
-
-    public void setWaiting(boolean waiting) {
-        this.waiting = waiting;
     }
 
     public Player getPlayer() {

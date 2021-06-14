@@ -1,12 +1,7 @@
 package connection;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import java.io.*;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 public class Server {

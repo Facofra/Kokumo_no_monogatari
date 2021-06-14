@@ -176,7 +176,7 @@ public class Screen {
         }
 
     }
-    public void playerAction(Player[] players, int playerTurn ){
+    public void playerAction(Player[] players, int playerTurn , Message message){
         Player actualPlayer = players[playerTurn];
         List<String> attackMessages = new ArrayList<>();
 
@@ -233,13 +233,14 @@ public class Screen {
         }
 //  dar mensajes, y desmarcar casilla de capitán si sigue vivo
         println();
-        for (String message:attackMessages) {
-            if (message.matches("[0-9]{2}")){
-                int row = Integer.valueOf( message.substring(0,1) );
-                int column = Integer.valueOf( message.substring(1,2) );
+        for (String attackMessage:attackMessages) {
+            if (attackMessage.matches("[0-9]{2}")){
+                int row = Integer.valueOf( attackMessage.substring(0,1) );
+                int column = Integer.valueOf( attackMessage.substring(1,2) );
                 playerManager.setTargetTransitable(true,row,column,actualPlayer);
+                message.setCaptainAttacked(true);
             }else {
-                System.out.println(message);
+                System.out.println(attackMessage);
             }
         }
         attackMessages.clear();
@@ -267,8 +268,6 @@ public class Screen {
             Ninja ninjaAux = playerManager.getNinjaFromBoard(originRow,originColumn,actualPlayer);
             ninjaAux.setCanMove(false);
             ninjaAux.setHasActed(true);
-//            actualPlayer.getBoard().eliminateNinja(originColumn,originRow);
-//            actualPlayer.getBoard().placeNinja(destinationColumn,destinationRow,ninjaAux);
             playerManager.eliminateNinjaFromBoard(originRow,originColumn,actualPlayer);
             playerManager.placeNinjaOnBoard(destinationColumn,destinationRow,ninjaAux,actualPlayer);
         }else{
