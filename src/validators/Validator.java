@@ -78,11 +78,11 @@ public class Validator {
             return false;
         }
         if (! actualPlayer.getNinjaFromBoard(i,j).isCanMove()){
-            message="Ninja no se puede mover, se ha movido el turno anterior.";
+            message="\nNinja no se puede mover, se ha movido el turno anterior.";
             return false;
         }
         if (! validateFreeSpace(i,j,actualPlayer.getBoard().getFields())){
-            message="Ninja no se puede mover, no tiene espacio libre al rededor.";
+            message="\nNinja no se puede mover, no tiene espacio libre al rededor.";
             return false;
         }
         return true;

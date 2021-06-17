@@ -7,16 +7,12 @@ public class Ninja {
     private char sprite;
     private NinjaType ninjaType;
     private int lives;
-    private int rowPosition;
-    private int columnPosition;
     private boolean hasActed;
 
     public Ninja(NinjaType ninjaType) {
         this.ninjaType = ninjaType;
         this.lives = ninjaType.getLives();
         this.sprite = ninjaType.getSprite();
-        this.rowPosition=-1;
-        this.columnPosition=-1;
         this.canMove=true;
         this.hasActed = false;
     }

@@ -118,6 +118,7 @@ public class Game {
         endGame(playerTurn);
     }
 
+
     public void nextTurn(){
         playerTurn = playerTurn == 1 ? 0 : 1;
     }
@@ -130,9 +131,8 @@ public class Game {
             Thread.sleep(2000);
         } catch (Exception ex) {}
         server.stop();
-        screen.println("\nPresione enter para salir.");
+        screen.println("\nPresione enter para continuar\n.");
         input.nextLine();
-        exit();
     }
     private boolean checkDeadOpponent(){
         Player opponent = players[playerTurn == 1 ? 0 : 1];
