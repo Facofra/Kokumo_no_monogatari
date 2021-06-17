@@ -4,7 +4,7 @@ import entities.Board;
 import entities.Player;
 
 public class Message {
-    private String ip;
+    private String pass;
     private String name;
     private Player player;
     private Board boardPlayer1;
@@ -52,19 +52,19 @@ public class Message {
         this.name = name;
     }
 
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
     public Player getPlayer() {
         return player;
     }
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public void setPass(String pass) {
+        this.pass = pass;
     }
 }

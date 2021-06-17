@@ -21,7 +21,7 @@ public class Client {
             return result;
 
         }catch (Exception ex){
-            return ex.getMessage();
+            return "ERROR URL";
         }
     }
 

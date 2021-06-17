@@ -5,6 +5,7 @@ import enums.NinjaType;
 import managers.PlayerManager;
 import validators.Validator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -94,8 +95,6 @@ public class Screen {
 
             String name = nameInput();
             server.setPlayerName(name);
-            print("Ingrese su ip: ");
-            server.setIp(ipInput());
 
             playerManager.initializePlayer(players,mode,boardSize,name,numberOfNinjas);
             if (mode == 1){
@@ -119,6 +118,9 @@ public class Screen {
             }
             if (goBack){
                 goBack=false;
+                try {
+                    server.stop();
+                } catch (Exception ex) {}
                 configurePlayer(players,server,client);
             }
 
@@ -314,96 +316,44 @@ public class Screen {
 
 
     }
-    private void serverScreen(Server server, Client client){
-        println("(1) Enviar solicitud para unirse");
-        println("(A) Atrás");
-        println("(S) Salir del juego");
-        println();
-        print("Elija opción: ");
-        lineReader = input.nextLine();
-        println();
-        if (lineReader.equals("s") || lineReader.equals("S")){
-            print("¿Seguro que desear salir? (S/N): ");
-            char confirm= confirmInput();
-            if (confirm =='S' || confirm == 's'){
-                exit();
-            }else{
-                serverScreen(server,client);
-            }
-
-        }
-        else if (lineReader.equals("1") ){
-            print("Ingrese IP a invitar: ");
-            String ipOpponent = ipInput();
-            client.setIpOpponent(ipOpponent);
-
-
-            waitingConnection(server,client);
-
-            if (goBack){
-                goBack=false;
-                serverScreen(server,client);
-            }
-
-        }
-        else if (lineReader.toUpperCase().equals("A")){
-            try {
-                server.stop();
-            } catch (Exception ex) {}
-            goBack=true;
-        }
-        else{
-            println("Input incorrecto, debe ser 1 o S");
-            println();
-            serverScreen(server,client);
-        }
-
-    }
     private void clientScreen(Server server, Client client){
-        println("(1) Ver solicitud para unirse");
-        println("(A) Atrás");
-        println("(S) Salir del juego");
-        println();
-        print("Elija opción: ");
-        lineReader = input.nextLine();
-        println();
-        if (lineReader.equals("s") || lineReader.equals("S")){
-            print("¿Seguro que desear salir? (S/N): ");
+
+        if (validator.validateIp( client.getIpOpponent() ) ){
+            print("\n¿ Unirse a: " + client.getIpOpponent() + " ? (S/N): ");
             char confirm= confirmInput();
-            if (confirm =='S' || confirm == 's'){
-                exit();
-            }else{
-                clientScreen(server,client);
+            println();
+            if (confirm =='N' || confirm == 'n'){
+                print("Ingrese IP a unirse: ");
+                String ipOpponent = ipInput();
+                client.setIpOpponent(ipOpponent);
             }
 
-        }
-        else if (lineReader.equals("1") ){
+        }else{
             print("Ingrese IP a unirse: ");
             String ipOpponent = ipInput();
             client.setIpOpponent(ipOpponent);
+        }
 
-            Message message = new Message();
-            message.setIp(ipOpponent);
-            message.setName(server.getPlayerName());
-            server.sendMessage(MessageManager.toJson(message));
+        try {
+            if (client.recieveMessage().equals("ERROR URL")){
+                println("\nTodavía no hay partida creada en esa IP\n");
+                goBack=true;
+            }else{
+                Message message = new Message();
+                message.setPass("password");
+                message.setName(server.getPlayerName());
+                server.sendMessage(MessageManager.toJson(message));
 
-            waitingForAcceptance(server,client);
-
-            if (goBack){
-                goBack=false;
-                clientScreen(server,client);
+                waitingForAcceptance(server,client);
             }
 
-        }
-        else if (lineReader.toUpperCase().equals("A")){
-            server.stop();
+        } catch (Exception ex) {
+            println("\nTodavía no hay partida creada en esa IP\n");
             goBack=true;
         }
-        else{
-            println("Input incorrecto, debe ser 1 ,S o A");
-            println();
-            clientScreen(server,client);
-        }
+
+
+
     }
     private void waitingForAcceptance(Server server, Client client){
         boolean waiting = true;
@@ -422,7 +372,7 @@ public class Screen {
                 try {
                     String response = client.recieveMessage();
                     Message message = MessageManager.jsonToMessage(response);
-                    if (message.getIp().equals(server.getIp())){
+                    if (message.getPass().equals("password")){
                         waiting=false;
                         goBack=false;
                         println("Host ha aceptado, nombre: " + message.getName());
@@ -433,13 +383,13 @@ public class Screen {
                     println("Host todavía no aceptó");
                 }
             }
-            else if (lineReader.toUpperCase().equals("S")){
+            else if (lineReader.equalsIgnoreCase("S")){
                 print("¿Seguro que desear salir? (S/N): ");
                 char confirm= confirmInput();
                 if (confirm =='S' || confirm == 's'){
                     exit();
                 }
-            }else if (lineReader.toUpperCase().equals("A")){
+            }else if (lineReader.equalsIgnoreCase("A")){
                 waiting=false;
                 goBack=true;
             }
@@ -449,36 +399,37 @@ public class Screen {
 
         }
     }
-    private void waitingConnection(Server server, Client client){
+    private void serverScreen(Server server, Client client){
         boolean waiting = true;
         while (waiting) {
             println("(1) Ver si oponente se conectó");
             println("(A) Atrás");
             println("(S) salir del juego");
-            print("Elija una opción: ");
+            print("\nElija una opción: ");
             lineReader = input.nextLine();
 
             if (lineReader.equals("1")){
                 println("\nChequeando si oponente se conectó, esto puede llevar un rato...");
                 println();
                 try {
+                    client.setIpOpponent(MessageHandler.getOpponentIp());
                     String response = client.recieveMessage();
                     Message message = MessageManager.jsonToMessage(response);
-                    if (message.getIp().equals(server.getIp())){
+                    if (message.getPass().equals("password")){
                         waiting=false;
+
                         println("Oponente conectado, nombre: " + message.getName());
                         println();
                         print("¿Aceptarlo? (S/N): ");
                         char confirm = confirmInput();
                         if (confirm == 'S' || confirm == 's'){
 
-                            message.setIp(client.getIpOpponent());
+                            message.setPass("password");
                             message.setName(server.getPlayerName());
                             server.sendMessage(MessageManager.toJson(message));
 
                         }else{
-                            println("Has negado la conexión, vuelves atrás");
-                            goBack=true;
+                            println("\nHas negado la conexión");
                         }
 
                     }else{
@@ -488,13 +439,13 @@ public class Screen {
                     println("Oponente todavía no conectado");
                 }
             }
-            else if (lineReader.toUpperCase().equals("S")){
+            else if (lineReader.equalsIgnoreCase("S")){
                 print("¿Seguro que desear salir? (S/N): ");
                 char confirm= confirmInput();
                 if (confirm =='S' || confirm == 's'){
                     exit();
                 }
-            }else if (lineReader.toUpperCase().equals("A")){
+            }else if (lineReader.equalsIgnoreCase("A")){
                 waiting=false;
                 goBack=true;
             }
@@ -524,7 +475,7 @@ public class Screen {
     private String ipInput(){
         lineReader = input.nextLine();
 
-        while (! lineReader.matches("^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$")){
+        while (! validator.validateIp(lineReader)){
             print("No es una IP valida. Ingrese IP: ");
             lineReader = input.nextLine();
         }
@@ -591,4 +542,14 @@ public class Screen {
         println("Saliendo del juego...");
         System.exit(0);
     }
+
+    public void clearScreen() {
+
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
