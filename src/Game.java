@@ -81,7 +81,7 @@ public class Game {
             screen.println("\n***** Tu Turno " + players[playerTurn].getName() + " *****");
             message.setCaptainAttacked(false);
 
-            screen.playerAction(players,playerTurn,message);
+            screen.playerAction(players,playerTurn,message, client);
 
             playing= ! checkDeadOpponent();
             if (playing){

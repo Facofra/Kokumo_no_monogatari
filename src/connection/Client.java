@@ -37,6 +37,18 @@ public class Client {
         }
     }
 
+    public void informExit(){
+        try {
+            URL url = new URL("http://"+ipOpponent+":"+port+"/exit");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("accept", "application/json");
+            InputStream responseStream = connection.getInputStream();
+
+        }catch (Exception ex){
+            System.out.println(ex.getMessage());
+        }
+    }
+
     public String getIpOpponent() {
         return ipOpponent;
     }

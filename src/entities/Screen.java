@@ -146,7 +146,6 @@ public class Screen {
 
         playerManager.placeNinjaOnBoard(column,row,new Ninja(NinjaType.COMMANDER),actualPlayer);
 
-//        actualPlayer.setNinja(i,new Ninja(NinjaType.COMMANDER),row, column);
         i++;
 
         while (actualPlayer.getNinjasOnBoardQuantity() < numberOfNinjas){
@@ -160,7 +159,6 @@ public class Screen {
             if (playerManager.getNinjaFromBoard(row,column,actualPlayer) == null){
                 playerManager.placeNinjaOnBoard(column,row,new Ninja(NinjaType.NORMAL),actualPlayer);
 
-//                actualPlayer.setNinja(i,new Ninja(NinjaType.NORMAL),row, column);
                 i++;
             }else {
                 println("En ese lugar ya había un ninja, colocar nuevamente.");
@@ -178,7 +176,7 @@ public class Screen {
         }
 
     }
-    public void playerAction(Player[] players, int playerTurn , Message message){
+    public void playerAction(Player[] players, int playerTurn , Message message, Client client){
         Player actualPlayer = players[playerTurn];
         List<String> attackMessages = new ArrayList<>();
 
@@ -206,7 +204,7 @@ public class Screen {
                         print("¿Seguro que desear salir? (S/N): ");
                         char confirm= confirmInput();
                         if (confirm =='S' || confirm == 's'){
-                            exit();
+                            informAndExit(client);
                         }else{
                             j--;
                         }
@@ -466,9 +464,13 @@ public class Screen {
                 input.nextLine();
             }
         }
+
+        if (ExitHandler.isExit()){
+            println("\n Oponente se retiró. Ganaste por abandono. \n");
+            exit();
+        }
+
         WaitingHandler.setWaiting(true);
-
-
         println("Oponente ha terminado.\n");
     }
 
@@ -542,7 +544,11 @@ public class Screen {
         println("Saliendo del juego...");
         System.exit(0);
     }
-
+    private void informAndExit(Client client){
+        client.informExit();
+        client.informEndTurn();
+        exit();
+    }
     public void clearScreen() {
 
         try {

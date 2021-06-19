@@ -6,9 +6,9 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class WaitingHandler implements HttpHandler {
-    private String message="wait handler";
-    private static boolean waiting=true;
+public class ExitHandler implements HttpHandler {
+    private String message="Exit";
+    private static boolean exit=false;
 
     public void handle(HttpExchange t) throws IOException {
         String response = message;
@@ -17,14 +17,14 @@ public class WaitingHandler implements HttpHandler {
         os.write(response.getBytes());
         os.close();
 
-        waiting=false;
+        exit=true;
     }
 
-    public static boolean isWaiting() {
-        return waiting;
+    public static boolean isExit() {
+        return exit;
     }
 
-    public static void setWaiting(boolean waiting) {
-        WaitingHandler.waiting = waiting;
+    public static void setExit(boolean exit) {
+        ExitHandler.exit = exit;
     }
 }

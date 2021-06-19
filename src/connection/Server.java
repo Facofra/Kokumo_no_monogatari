@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 public class Server {
     MessageHandler messageHandler = new MessageHandler();
     WaitingHandler waitingHandler = new WaitingHandler();
+    ExitHandler exitHandler = new ExitHandler();
     HttpServer server;
     private String ip;
     private String playerName;
@@ -16,6 +17,7 @@ public class Server {
         server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", messageHandler);
         server.createContext("/waiting",waitingHandler );
+        server.createContext("/exit",exitHandler );
         server.setExecutor(null);
         server.start();
 
