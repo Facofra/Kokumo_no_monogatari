@@ -1,3 +1,5 @@
+package Game;
+
 import connection.*;
 import entities.*;
 import validators.Validator;
@@ -10,22 +12,16 @@ public class Game {
     private Screen screen;
     private Player[] players;
     private Scanner input;
-    private Validator validator;
     private int playerTurn;
-    private final int boardSize;
-    private final int numberOfNinjas;
 
-    public Game(int boardSize, int numberOfNinjas) {
-        input = new Scanner(System.in);
-        players = new Player[2];
-        this.boardSize= boardSize;
-        this.numberOfNinjas = numberOfNinjas;
-        this.validator = new Validator(boardSize, numberOfNinjas);
-        screen = new Screen(boardSize, numberOfNinjas,validator);
-        this.server = new Server();
-        this.client = new Client();
-
+    public Game(Server server, Client client, Screen screen, Player[] players, Scanner input) {
+        this.server = server;
+        this.client = client;
+        this.screen = screen;
+        this.players = players;
+        this.input = input;
     }
+
 
     public void run(){
         boolean playing = true;
