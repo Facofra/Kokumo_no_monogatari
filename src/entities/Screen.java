@@ -414,14 +414,14 @@ public class Screen {
                     String response = client.recieveMessage();
                     Message message = MessageManager.jsonToMessage(response);
                     if (message.getPass().equals("password")){
-                        waiting=false;
+
 
                         println("Oponente conectado, nombre: " + message.getName());
                         println();
                         print("¿Aceptarlo? (S/N): ");
                         char confirm = confirmInput();
                         if (confirm == 'S' || confirm == 's'){
-
+                            waiting=false;
                             message.setPass("password");
                             message.setName(server.getPlayerName());
                             server.sendMessage(MessageManager.toJson(message));
